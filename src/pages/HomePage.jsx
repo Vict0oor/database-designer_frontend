@@ -73,13 +73,11 @@ const HomePage = () => {
     };
   };  
   
-  
   const handleGenerateJson = () => {
     const jsonSchema = generateJsonSchema(entities, relationships);
     console.log("Generated JSON:", JSON.stringify(jsonSchema, null, 2));
   };
 
-  
   return (
 
     <div className="mx-auto" >
