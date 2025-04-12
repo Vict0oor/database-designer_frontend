@@ -1,4 +1,3 @@
-
 const sqlKeywords = [
     "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE", "JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER",
     "GROUP", "BY", "ORDER", "ASC", "DESC", "HAVING", "LIMIT", "OFFSET", "DISTINCT", "AND", "OR", "NOT", "IS",
