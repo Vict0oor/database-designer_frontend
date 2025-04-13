@@ -31,7 +31,7 @@ const SqlCodeContainer = ({ sqlCode, isLoading, error }) => {
                     className="text-xs flex items-center space-x-2 bg-zinc-700 hover:bg-zinc-600 px-3 py-1 cursor-pointer rounded-md transition-colors"
                 >
                     <Copy size={16} />
-                    <span>{copied ? "Copied!" : "Copy Code"}</span>
+                    <span>{copied ? "Copied" : "Copy Code"}</span>
                 </button>
             </div>
 

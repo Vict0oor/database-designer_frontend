@@ -34,6 +34,9 @@ const RelationshipEdge = memo(
     } else if (data?.type === "one-to-many") {
       sourceSymbol = data.sourceCardinality === "one" ? "1" : "N";
       targetSymbol = data.targetCardinality === "one" ? "1" : "N";
+    } else if (data?.type === "inheritance") {
+      sourceSymbol = "B";
+      targetSymbol = "D";
     }
 
     const handleDelete = (event) => {
@@ -79,9 +82,8 @@ const RelationshipEdge = memo(
           <div
             style={{
               position: "absolute",
-              transform: `translate(-50%, -50%) translate(${
-                sourceX + (targetX - sourceX) * 0.1
-              }px,${sourceY + (targetY - sourceY) * 0.1}px)`,
+              transform: `translate(-50%, -50%) translate(${sourceX + (targetX - sourceX) * 0.1
+                }px,${sourceY + (targetY - sourceY) * 0.1}px)`,
               pointerEvents: "none",
             }}
             className="nodrag nopan"
@@ -96,9 +98,8 @@ const RelationshipEdge = memo(
           <div
             style={{
               position: "absolute",
-              transform: `translate(-50%, -50%) translate(${
-                targetX - (targetX - sourceX) * 0.2
-              }px,${targetY - (targetY - sourceY) * 0.2}px)`,
+              transform: `translate(-50%, -50%) translate(${targetX - (targetX - sourceX) * 0.2
+                }px,${targetY - (targetY - sourceY) * 0.2}px)`,
               pointerEvents: "none",
             }}
             className="nodrag nopan"
