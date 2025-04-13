@@ -35,8 +35,8 @@ const RelationshipEdge = memo(
       sourceSymbol = data.sourceCardinality === "one" ? "1" : "N";
       targetSymbol = data.targetCardinality === "one" ? "1" : "N";
     } else if (data?.type === "inheritance") {
-      sourceSymbol = "B";
-      targetSymbol = "D";
+      sourceSymbol = data.sourceCardinality === "base" ? "B" : "D";
+      targetSymbol = data.targetCardinality === "base" ? "B" : "D";
     }
 
     const handleDelete = (event) => {

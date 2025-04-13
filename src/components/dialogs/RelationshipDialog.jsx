@@ -92,7 +92,7 @@ const RelationshipDialog = ({ open, onOpenChange, onSave, entities, selectedRela
                     onChange={(e) => setInheritanceBase(e.target.value)}
                     className="mr-1"
                   />
-                  <span>Source</span>
+                  <span className="text-green-600">Source</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -103,7 +103,7 @@ const RelationshipDialog = ({ open, onOpenChange, onSave, entities, selectedRela
                     onChange={(e) => setInheritanceBase(e.target.value)}
                     className="mr-1"
                   />
-                  <span>Target</span>
+                  <span className="text-red-500">Target</span>
                 </label>
               </div>
             </div>
