@@ -1,15 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import api from "../../api/axioInstance"
 
-const fetchSqlCode = async (jsonSchema) => {
+const generateSqlCode = async (jsonSchema) => {
   const { data } = await api.post('/generate-sql', jsonSchema)
   return data
 }
 
-export const useSqlCode = (jsonSchema, enabled = true) => {
-  return useQuery({
-    queryKey: ['g-sql-code', jsonSchema],
-    queryFn: () => fetchSqlCode(jsonSchema),
-    enabled,
-  })
-}
+export const useSqlCode = (onSuccess, onError) => {
+  return useMutation({
+    mutationFn: generateSqlCode,
+    onSuccess,
+    onError
+  });
+};
