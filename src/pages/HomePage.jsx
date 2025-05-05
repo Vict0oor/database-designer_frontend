@@ -6,6 +6,7 @@ import SqlCodeContainer from '../components/SqlCodeContainer';
 import { useSqlCode } from '../api/hooks/sqlHooks';
 import { useExecuteSqlCode } from '../api/hooks/databaseConnectionHooks';
 import { toast } from 'react-toastify';
+import { LENGTH_SUPPORTING_TYPES, PRECISION_SUPPORTING_TYPES } from '../constants/attributeTypes';
 
 const HomePage = () => {
   const [entities, setEntities] = useState([]);
@@ -52,7 +53,7 @@ const HomePage = () => {
 
   const handleSubmitForm = (e) => {
     e.preventDefault();
-    
+
     if (!dbConnection.host || !dbConnection.port || !dbConnection.database || !dbConnection.username || !dbConnection.password) {
       const missingFields = [];
       if (!dbConnection.host) missingFields.push('Host');
@@ -60,7 +61,7 @@ const HomePage = () => {
       if (!dbConnection.database) missingFields.push('Database Name');
       if (!dbConnection.username) missingFields.push('Username');
       if (!dbConnection.password) missingFields.push('Password');
-      
+
       const missingFieldsMessage = `The following fields are missing: ${missingFields.join(', ')}`;
       setTerminalMessages((prevMessages) => [
         ...prevMessages,
@@ -87,12 +88,31 @@ const HomePage = () => {
 
   const { mutate: generateSqlCode, isLoading: isGeneratingSqlCode, error } = useSqlCode(handleSuccessGenerateSqlCode, handleErrorGenerateSqlCode);
 
+  const getFullTypeDefinition = (attribute) => {
+    const { type, length, precision, scale } = attribute;
+
+    if (LENGTH_SUPPORTING_TYPES.includes(type) && length !== null) {
+      return `${type}(${length})`;
+    } else if (PRECISION_SUPPORTING_TYPES.includes(type)) {
+      if (scale !== null && precision !== null) {
+        return `${type}(${precision},${scale})`;
+      } else if (precision !== null) {
+        return `${type}(${precision})`;
+      }
+    }
+
+    return type;
+  };
 
   const generateJsonSchema = (entities, relationships) => {
     const tables = entities.map(entity => {
       const fields = entity.attributes.map(attr => ({
         name: attr.name,
-        type: attr.type,
+        type: getFullTypeDefinition(attr), 
+        primitiveType: attr.type,
+        length: attr.length,
+        precision: attr.precision,
+        scale: attr.scale,
         primaryKey: attr.isPrimaryKey,
         unique: attr.isUnique,
         nullable: attr.isNullable,
@@ -139,7 +159,6 @@ const HomePage = () => {
       relationships: rels,
     };
   };
-
   const handleGenerateJson = () => {
     const json = generateJsonSchema(entities, relationships);
     setSchemaJson(json);

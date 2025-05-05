@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 import { toast } from "react-toastify";
 import { validateAttributeName, validateEntityName } from "../../utils/validation";
-import { ATTRIBUTE_TYPES, DEFAULT_ATTRIBUTE_TYPE} from "../../constants/attributeTypes";
+import { 
+  ATTRIBUTE_TYPES, 
+  DEFAULT_ATTRIBUTE_TYPE,
+  LENGTH_SUPPORTING_TYPES,
+  PRECISION_SUPPORTING_TYPES,
+  DEFAULT_LENGTH_VALUES
+} from "../../constants/attributeTypes";
 
 
 const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => {
@@ -15,6 +21,9 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
     isNullable: true,
     isUnique: false,
     defaultValue: "",
+    length: null,
+    precision: null,
+    scale: null
   });
 
   useEffect(() => {
@@ -31,9 +40,38 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
         isNullable: true,
         isUnique: false,
         defaultValue: "",
+        length: null,
+        precision: null,
+        scale: null
       });
     }
   }, [open, editingEntity]);
+
+  useEffect(() => {
+    const type = newAttribute.type;
+    let updatedAttribute = { ...newAttribute };
+
+    if (LENGTH_SUPPORTING_TYPES.includes(type)) {
+      updatedAttribute.length = DEFAULT_LENGTH_VALUES[type] || null;
+      updatedAttribute.precision = null;
+      updatedAttribute.scale = null;
+    } else if (PRECISION_SUPPORTING_TYPES.includes(type)) {
+      updatedAttribute.length = null;
+      if (Array.isArray(DEFAULT_LENGTH_VALUES[type])) {
+        updatedAttribute.precision = DEFAULT_LENGTH_VALUES[type][0] || null;
+        updatedAttribute.scale = DEFAULT_LENGTH_VALUES[type][1] || null;
+      } else {
+        updatedAttribute.precision = DEFAULT_LENGTH_VALUES[type] || null;
+        updatedAttribute.scale = null;
+      }
+    } else {
+      updatedAttribute.length = null;
+      updatedAttribute.precision = null;
+      updatedAttribute.scale = null;
+    }
+
+    setNewAttribute(updatedAttribute);
+  }, [newAttribute.type]);
 
   const handleAddAttribute = () => {
     const validationError = validateAttributeName(newAttribute.name, attributes);
@@ -44,6 +82,18 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
 
     if (newAttribute.isPrimaryKey && attributes.some(attr => attr.isPrimaryKey)) {
       toast.error("There is already a primary key.");
+      return;
+    }
+
+    if (LENGTH_SUPPORTING_TYPES.includes(newAttribute.type) && 
+        (newAttribute.length === null || newAttribute.length <= 0)) {
+      toast.error(`Length must be a positive number for ${newAttribute.type} type.`);
+      return;
+    }
+
+    if (PRECISION_SUPPORTING_TYPES.includes(newAttribute.type) && 
+        (newAttribute.precision === null || newAttribute.precision <= 0)) {
+      toast.error(`Precision must be a positive number for ${newAttribute.type} type.`);
       return;
     }
 
@@ -58,6 +108,9 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
       isNullable: true,
       isUnique: false,
       defaultValue: "",
+      length: null,
+      precision: null,
+      scale: null
     });
   };
 
@@ -103,6 +156,25 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
 
     onSave(entity);
   };
+
+  const getFormattedTypeName = (attribute) => {
+    const { type, length, precision, scale } = attribute;
+    
+    if (LENGTH_SUPPORTING_TYPES.includes(type) && length !== null) {
+      return `${type}(${length})`;
+    } else if (PRECISION_SUPPORTING_TYPES.includes(type)) {
+      if (scale !== null && precision !== null) {
+        return `${type}(${precision},${scale})`;
+      } else if (precision !== null) {
+        return `${type}(${precision})`;
+      }
+    }
+    
+    return type;
+  };
+
+  const shouldShowLengthInput = LENGTH_SUPPORTING_TYPES.includes(newAttribute.type);
+  const shouldShowPrecisionInput = PRECISION_SUPPORTING_TYPES.includes(newAttribute.type);
 
   return (
     open && (
@@ -155,6 +227,61 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
               ))}
             </select>
           </div>
+
+          {shouldShowLengthInput && (
+            <div className="flex gap-2 mb-2">
+              <label className="flex items-center">
+                <span className="mr-2">Length:</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={newAttribute.length || ''}
+                  onChange={(e) =>
+                    setNewAttribute({
+                      ...newAttribute,
+                      length: parseInt(e.target.value) || null
+                    })
+                  }
+                  className="border p-2 w-20 rounded"
+                />
+              </label>
+            </div>
+          )}
+
+          {shouldShowPrecisionInput && (
+            <div className="flex gap-4 mb-2">
+              <label className="flex items-center">
+                <span className="mr-2">Precision:</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={newAttribute.precision || ''}
+                  onChange={(e) =>
+                    setNewAttribute({
+                      ...newAttribute,
+                      precision: parseInt(e.target.value) || null
+                    })
+                  }
+                  className="border p-2 w-20 rounded"
+                />
+              </label>
+              <label className="flex items-center">
+                <span className="mr-2">Scale:</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={newAttribute.scale || ''}
+                  onChange={(e) =>
+                    setNewAttribute({
+                      ...newAttribute,
+                      scale: parseInt(e.target.value) || null
+                    })
+                  }
+                  className="border p-2 w-20 rounded"
+                />
+              </label>
+            </div>
+          )}
 
           <div className="flex gap-2 mb-2">
             <label className="flex items-center cursor-pointer">
@@ -218,7 +345,7 @@ const TableDialog = ({ open, onOpenChange, onSave, editingEntity, entities}) => 
                   <div className="flex flex-col">
                     <span className="text-white font-medium line-clamp-1">
                       {attr.name}{" "}
-                      <span className="text-orange-500">({attr.type})</span>
+                      <span className="text-orange-500">({getFormattedTypeName(attr)})</span>
                     </span>
 
                     <div className="flex gap-2 mt-1">

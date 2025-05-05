@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import { Database, FileJson } from "lucide-react"
-
+import { useNavigate, useLocation } from "react-router-dom";
 const Header = () => {
-    const [activeTab, setActiveTab] = useState("erd");
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const activeTab = location.pathname.includes("plsql") ? "plsql" : "erd";
 
     const handleTabChange = (tab) => {
-        setActiveTab(tab);
+        if (tab === "erd") {
+            navigate("/home");
+        } else if (tab === "plsql") {
+            navigate("/plsql");
+        }
     };
 
     return (

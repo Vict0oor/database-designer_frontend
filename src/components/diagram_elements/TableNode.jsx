@@ -1,9 +1,26 @@
 import { Handle, Position } from "reactflow";
 import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { LENGTH_SUPPORTING_TYPES, PRECISION_SUPPORTING_TYPES } from "../../constants/attributeTypes";
 
 const TableNode = ({ data }) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  const getFormattedTypeName = (attribute) => {
+    const { type, length, precision, scale } = attribute;
+    
+    if (LENGTH_SUPPORTING_TYPES.includes(type) && length !== null) {
+      return `${type} (${length})`;
+    } else if (PRECISION_SUPPORTING_TYPES.includes(type)) {
+      if (scale !== null && precision !== null) {
+        return `${type} (${precision},${scale})`;
+      } else if (precision !== null) {
+        return `${type} (${precision})`;
+      }
+    }
+    
+    return type;
+  };
 
   return (
     <div
@@ -77,7 +94,7 @@ const TableNode = ({ data }) => {
                       </td>
                       <td className="px-4 py-2 border-b border-white">
                         <div className="flex items-center gap-2">
-                          <span>{attr.type}</span>
+                          <span>{getFormattedTypeName(attr)}</span>
                           {!attr.isNullable && (
                             <span className="text-xs bg-red-600 text-white px-1 rounded">
                               NN
