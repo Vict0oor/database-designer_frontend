@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useLoadTables } from "../../api/hooks/databaseConnectionHooks";
+import { toast } from "react-toastify";
 
-const DatabseConnectionForm = ({ onBack }) => {
+const DatabseConnectionForm = ({ onBack, onSucces}) => {
   const [formData, setFormData] = useState({
     host: "",
     port: "",
@@ -16,15 +18,36 @@ const DatabseConnectionForm = ({ onBack }) => {
   };
 
   const handleSubmit = () => {
-    console.log("Database connection data:", formData);
-    alert("Database connection request submitted");
+    const { host, port, username, password, database } = formData;
+    if (!host || !port || !username || !password || !database) {
+      toast.error("All fields must be completed!");
+      return;
+    }
+
+    loadTables({
+      host,
+      port: parseInt(port, 10),
+      username,
+      password,
+      database: database,
+    });
   };
+
+  const { mutate: loadTables, } = useLoadTables({
+    onSuccess: (data) => {
+      onSucces(data.tables, formData); 
+    },    
+    onError: (error) => {
+      console.error("Connection Error:", error);
+      toast.error("Connection Error!");
+    },
+  });
 
   return (
     <div className="bg-black p-6 rounded-xl text-white w-full max-w-2xl relative">
       <button 
         onClick={onBack} 
-        className="absolute top-4 right-4 text-gray-400 hover:text-white"
+        className=" cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-white"
       >
         <X size={24} />
       </button>
@@ -96,7 +119,7 @@ const DatabseConnectionForm = ({ onBack }) => {
         <div className="pt-4">
           <button 
             onClick={handleSubmit}
-            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 rounded font-medium transition-colors"
+            className="cursor-pointer px-6 py-2 bg-orange-500 hover:bg-orange-600 rounded font-medium transition-colors"
           >
             Connect
           </button>
