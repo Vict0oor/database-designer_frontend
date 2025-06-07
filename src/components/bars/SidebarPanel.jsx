@@ -11,7 +11,7 @@ const SidebarPanel = ({ tables, databaseData }) => {
     };
     console.log(databaseData);
     return (
-        <div className="w-1/6 bg-black p-4 overflow-y-auto h-screen">
+        <div className="w-full bg-black p-4 overflow-y-auto min-h-screen h-full ">
             <h3 className="text-white text-lg font-semibold mb-2">Connected database</h3>
 
             <div className="text-sm text-gray-300 space-y-1 mb-4">

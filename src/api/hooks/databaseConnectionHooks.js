@@ -31,6 +31,28 @@ const fetchTables = async (dbConnection) => {
   return data;
 };
 
+const executePLSqlCode = async (payload) => {
+    const { data } = await api.post('/database-connection/execute-code',payload)
+    return data
+} 
+
+export const useExecutePLSqlCode = ({ onSuccess, onError })  => {
+    return useMutation({
+      mutationFn: executePLSqlCode,
+      onSuccess: (data) => {
+        if (onSuccess) {
+          onSuccess(data);
+        }
+      },
+      onError: (error) => {
+        if (onError) {
+          onError(error);
+        }
+      },
+    });
+  };
+  
+
 export const useExecuteSqlCode = ({ onSuccess, onError })  => {
     return useMutation({
       mutationFn: executeSqlCode,

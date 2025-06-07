@@ -108,7 +108,7 @@ const HomePage = () => {
     const tables = entities.map(entity => {
       const fields = entity.attributes.map(attr => ({
         name: attr.name,
-        type: getFullTypeDefinition(attr), 
+        type: getFullTypeDefinition(attr),
         primitiveType: attr.type,
         length: attr.length,
         precision: attr.precision,
@@ -233,7 +233,6 @@ const HomePage = () => {
         <div className='mt-5 mb-10'>
           <SqlCodeContainer sqlCode={sqlCode} isLoading={isGeneratingSqlCode} error={error} />
         </div>
-
 
         <div className={`fixed bottom-0 left-0 w-full bg-black p-5 transform ${isTerminalOpen ? 'translate-y-0' : 'translate-y-full'} transition-transform duration-500 z-50`}>
           <div className="flex justify-between items-center mb-4">
