@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Header from "../components/Header";
-import { Database, FileText } from "lucide-react";
+import { Database, FileText, Play } from "lucide-react";
 import React from "react";
 import DatabseConnectionForm from "../components/forms/databseConnectionForm";
 import SqlFileForm from "../components/forms/SqlFileForm";
@@ -18,6 +18,7 @@ const TypeSelector = ({ onSelect }) => {
         { id: 'procedure', name: 'Procedure', icon: <Workflow className="w-10 h-10 mb-2" /> },
         { id: 'function', name: 'Function', icon: <FunctionSquare className="w-10 h-10 mb-2" /> },
         { id: 'query', name: 'SQL Query', icon: <FileCode className="w-10 h-10 mb-2" /> },
+        { id: 'execute', name: 'Execute', icon: <Play className="w-10 h-10 mb-2" /> },
     ];
 
     return (
@@ -48,6 +49,7 @@ const PlSqlPage = () => {
     const [loadOption, setLoadOption] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [tables, setTables] = useState([]);
+    const [routines, setRoutines] = useState([]);
     const [databaseInfo, setDatabaseInfo] = useState(null);
     const [selectedType, setSelectedType] = useState(null);
 
@@ -62,10 +64,14 @@ const PlSqlPage = () => {
         setSelectedType(null);
     };
 
-    const handleTablesSuccess = (tablesData, connectionData) => {
+    const handleTablesSuccess = (tablesData,connectionData) => {
         setDatabaseInfo(connectionData);
         setTables(tablesData);
         setIsConnected(true);
+    };
+
+    const handleRoutinesSuccess = (routinesData) => {
+        setRoutines(routinesData);
     };
 
     const handleTypeSelect = (type) => {
@@ -114,6 +120,7 @@ const PlSqlPage = () => {
                     onTypeChange={(type) => setSelectedType(type)}
                     databaseTables={tables}
                     databaseConData={databaseInfo}
+                    routines={routines}
                 />
             );
         }
@@ -121,7 +128,7 @@ const PlSqlPage = () => {
         if (loadOption === "database" && !isConnected) {
             return (
                 <div className="flex justify-center items-center h-[80vh] w-full">
-                    <DatabseConnectionForm onBack={handleBackClick} onSucces={handleTablesSuccess} />
+                    <DatabseConnectionForm onBack={handleBackClick} onSucces={handleTablesSuccess} onSucces2={handleRoutinesSuccess} />
                 </div>
             );
         }
@@ -143,7 +150,7 @@ const PlSqlPage = () => {
             <div className="flex w-full gap-4">
                 {isConnected && (
                     <div className="w-1/5">
-                        <SidebarPanel tables={tables} databaseData={databaseInfo} />
+                        <SidebarPanel tables={tables} routines={routines} databaseData={databaseInfo} />
                     </div>
                 )}
                 <div className={`flex-grow ${isConnected ? "w-3/4" : "w-full"}`}>{renderMainContent()}</div>

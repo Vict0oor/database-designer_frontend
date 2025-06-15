@@ -2,20 +2,22 @@ import React, { useState } from "react";
 import SqlCodeContainer from "../SqlCodeContainer";
 import ProcedureBuilder from "./ProcedureBuilder";
 import FunctionBuilder from "./FunctionBuilder";
+import RoutineExecutor from "./RoutineExecutor";
 import { toast } from "react-toastify";
 import SQLBuilder from "./SQLBuilder";
 const typeLabels = {
     procedure: "Procedure",
     function: "Function",
     query: "SQL Query",
+    execute: "Execute",
 };
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useGenerateQuery } from "../../api/hooks/sqlHooks";
-import { useGenerateProcedure, useGenerateFunction } from "../../api/hooks/sqlHooks";
+import { useGenerateProcedure, useGenerateFunction, useGenerateExeCode } from "../../api/hooks/sqlHooks";
 import { useExecutePLSqlCode } from "../../api/hooks/databaseConnectionHooks";
 import { motion, AnimatePresence } from "framer-motion";
 
-const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTables }) => {
+const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTables, routines }) => {
     const [generatedCode, setGeneratedCode] = useState("");
     const [generateJson, setGenerateJson] = useState("");
     const [source, setSoruce] = useState("");
@@ -32,7 +34,7 @@ const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTable
             setGeneratedCode(data);
         },
         (error) => {
-            console.error("Błąd generowania zapytania:", error);
+            console.error("Query generation error:", error);
         }
     );
 
@@ -41,16 +43,25 @@ const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTable
             setGeneratedCode(procedureCode);
         },
         (errorProcedure) => {
-            console.error("Błąd generowania zapytania:", errorProcedure);
+            console.error("Query generation error:", errorProcedure);
         }
     );
 
-        const { mutate: generateFunctionMutate } = useGenerateFunction(
+    const { mutate: generateFunctionMutate } = useGenerateFunction(
         (procedureCode) => {
             setGeneratedCode(procedureCode);
         },
         (errorProcedure) => {
-            console.error("Błąd generowania zapytania:", errorProcedure);
+            console.error("Query generation error:", errorProcedure);
+        }
+    );
+
+    const { mutate: generateExeCodeMutate } = useGenerateExeCode(
+        (procedureCode) => {
+            setGeneratedCode(procedureCode);
+        },
+        (errorProcedure) => {
+            console.error("Query generation error:", errorProcedure);
         }
     );
 
@@ -98,6 +109,8 @@ const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTable
                 return <FunctionBuilder databaseTables={databaseTables} onJsonUpdate={handleJsonUpdate} />;
             case "query":
                 return <SQLBuilder databaseTables={databaseTables} onJsonUpdate={handleJsonUpdate} />;
+            case "execute":
+                return <RoutineExecutor availableRoutines={routines} onJsonUpdate={handleJsonUpdate} />;
             default:
                 return null;
         }
@@ -140,6 +153,8 @@ const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTable
             generateProcedureMutate(generateJson);
         } else if (source === "FUNCTION") {
             generateFunctionMutate(generateJson);
+        } else if (source === "ROUTINE_EXECUTION") {
+            generateExeCodeMutate(generateJson);
         } else {
             alert("Unsupported source type for generation");
         }
@@ -255,8 +270,8 @@ const PlSqlPanel = ({ databaseConData, selectedType, onTypeChange, databaseTable
                                                             key={i}
                                                             onClick={() => setCurrentPage(i + 1)}
                                                             className={`px-3 py-1 rounded cursor-pointer ${currentPage === i + 1
-                                                                    ? "bg-orange-500 text-white"
-                                                                    : "bg-[#171717] text-white hover:bg-orange-500"
+                                                                ? "bg-orange-500 text-white"
+                                                                : "bg-[#171717] text-white hover:bg-orange-500"
                                                                 }`}
                                                         >
                                                             {i + 1}

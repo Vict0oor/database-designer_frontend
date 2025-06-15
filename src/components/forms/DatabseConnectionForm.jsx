@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { useLoadTables } from "../../api/hooks/databaseConnectionHooks";
+import { useLoadTables, useLoadRoutines } from "../../api/hooks/databaseConnectionHooks";
 import { toast } from "react-toastify";
 
-const DatabseConnectionForm = ({ onBack, onSucces}) => {
+const DatabseConnectionForm = ({ onBack, onSucces, onSucces2 }) => {
   const [formData, setFormData] = useState({
     host: "",
     port: "",
@@ -23,8 +23,14 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
       toast.error("All fields must be completed!");
       return;
     }
-
     loadTables({
+      host,
+      port: parseInt(port, 10),
+      username,
+      password,
+      database: database,
+    });
+    loadRoutines({
       host,
       port: parseInt(port, 10),
       username,
@@ -35,8 +41,18 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
 
   const { mutate: loadTables, } = useLoadTables({
     onSuccess: (data) => {
-      onSucces(data.tables, formData); 
-    },    
+      onSucces(data.tables, formData);
+    },
+    onError: (error) => {
+      console.error("Connection Error:", error);
+      toast.error("Connection Error!");
+    },
+  });
+
+  const { mutate: loadRoutines, } = useLoadRoutines({
+    onSuccess: (data) => {
+      onSucces2(data);
+    },
     onError: (error) => {
       console.error("Connection Error:", error);
       toast.error("Connection Error!");
@@ -45,15 +61,15 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
 
   return (
     <div className="bg-black p-6 rounded-xl text-white w-full max-w-2xl relative">
-      <button 
-        onClick={onBack} 
+      <button
+        onClick={onBack}
         className=" cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-white"
       >
         <X size={24} />
       </button>
-      
+
       <h2 className="text-2xl font-bold mb-6">Database Connection</h2>
-      
+
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -79,7 +95,7 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
             />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Username</label>
@@ -102,7 +118,7 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
             />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Database</label>
@@ -115,9 +131,9 @@ const DatabseConnectionForm = ({ onBack, onSucces}) => {
             />
           </div>
         </div>
-        
+
         <div className="pt-4">
-          <button 
+          <button
             onClick={handleSubmit}
             className="cursor-pointer px-6 py-2 bg-orange-500 hover:bg-orange-600 rounded font-medium transition-colors"
           >

@@ -31,6 +31,19 @@ const fetchTables = async (dbConnection) => {
   return data;
 };
 
+const fetchRoutines = async (dbConnection) => {
+  const databaseConnectionRequest ={
+     host: dbConnection.host,
+      port: dbConnection.port,
+      databaseName: dbConnection.database,
+      username: dbConnection.username,
+      password: dbConnection.password,
+  };
+  
+  const { data } = await api.post('/database-connection/get-routines', databaseConnectionRequest);
+  return data;
+};
+
 const executePLSqlCode = async (payload) => {
     const { data } = await api.post('/database-connection/execute-code',payload)
     return data
@@ -72,6 +85,18 @@ export const useExecuteSqlCode = ({ onSuccess, onError })  => {
   export const useLoadTables = ({ onSuccess, onError } = {}) => {
     return useMutation({
       mutationFn: fetchTables,
+      onSuccess: (data) => {
+        onSuccess(data);
+      },
+      onError: (error) => {
+        onError(error);
+      },
+    });
+  };
+
+    export const useLoadRoutines = ({ onSuccess, onError } = {}) => {
+    return useMutation({
+      mutationFn: fetchRoutines,
       onSuccess: (data) => {
         onSuccess(data);
       },

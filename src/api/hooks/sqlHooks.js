@@ -20,6 +20,11 @@ const generateFunction = async (jsonSchema)=> {
   const { data } = await api.post('/plsql/generate/function', jsonSchema)
   return data
 }
+const generateExeCode = async (jsonSchema)=> {
+  const { data } = await api.post('/plsql/generate/exe-code', jsonSchema)
+  return data
+}
+
 
 export const useSqlCode = (onSuccess, onError) => {
   return useMutation({
@@ -44,9 +49,18 @@ export const useGenerateProcedure = (onSuccess, onError) => {
     onError
   });
 };
+
 export const useGenerateFunction = (onSuccess, onError) => {
   return useMutation({
     mutationFn: generateFunction,
+    onSuccess,
+    onError
+  });
+};
+
+export const useGenerateExeCode = (onSuccess, onError) => {
+  return useMutation({
+    mutationFn: generateExeCode,
     onSuccess,
     onError
   });
